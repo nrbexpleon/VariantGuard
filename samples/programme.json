@@ -1,0 +1,15 @@
+{
+  "name": "Global EV Platform",
+  "release": "2027.1",
+  "owner": "Release Assurance Lead",
+  "description": "Illustrative SDV programme covering gateway, diagnostics, OTA, and connected cockpit variants.",
+  "exampleVariant": {
+    "name": "EV Premium EU",
+    "platform": "SDV-1",
+    "hardware": "HPC-A",
+    "os": "Linux",
+    "middleware": "SOME-IP",
+    "features": ["diagnostics", "ota", "infotainment"],
+    "safetyLevel": "ASIL-B"
+  }
+}
