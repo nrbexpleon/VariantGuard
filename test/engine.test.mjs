@@ -1,0 +1,9 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {analyze,compatibility,validateProgram,validateVariant} from '../src/engine.mjs';
+const component={id:'c1',name:'Diagnostics',version:'4.2',tags:['diagnostics'],constraints:{platforms:['SDV-1'],hardware:['HPC-A'],os:['Linux'],middleware:['SOME-IP']}};
+const variant={id:'v1',name:'EV Premium',platform:'SDV-1',hardware:'HPC-A',os:'Linux',middleware:'SOME-IP',features:['diagnostics'],components:['c1'],safetyLevel:'ASIL-B'};
+const tests=[{id:'t1',name:'Diagnostic regression',kind:'REGRESSION',tags:['diagnostics'],componentIds:['c1'],platforms:['SDV-1']},{id:'t2',name:'Safety regression',kind:'SAFETY',tags:['diagnostics'],componentIds:['c1'],platforms:['SDV-1']}];
+test('validates programme and variant',()=>{assert.equal(validateProgram({name:'P',owner:'O',release:'1'}).length,0);assert.equal(validateVariant(variant).length,0)});
+test('detects compatible variant',()=>assert.equal(compatibility(component,variant).compatible,true));
+test('explains incompatibility',()=>{const r=compatibility(component,{...variant,os:'QNX'});assert.equal(r.compatible,false);assert.match(r.reasons[0],/OS QNX/)});
+test('selects risk-based tests',()=>{const p={components:[component],variants:[variant],tests};const a=analyze(p,{id:'a',createdAt:'x',title:'Change',componentId:'c1',changeType:'MINOR',changedTags:[],cybersecurityRelevant:false});assert.equal(a.summary.affectedVariants,1);assert.equal(a.summary.selectedTests,2);assert.equal(a.summary.coverageGaps,0);assert.equal(a.decision,'CANDIDATE_FOR_RELEASE')});
+test('holds release for cyber coverage gap',()=>{const p={components:[component],variants:[variant],tests};const a=analyze(p,{id:'a',createdAt:'x',title:'Change',componentId:'c1',changeType:'MAJOR',changedTags:[],cybersecurityRelevant:true});assert.equal(a.decision,'HOLD');assert.deepEqual(a.variants[0].missingTestKinds,['CYBERSECURITY'])});
